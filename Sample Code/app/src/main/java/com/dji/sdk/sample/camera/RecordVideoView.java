@@ -195,6 +195,7 @@ public class RecordVideoView extends BaseThreeBtnView {
     protected void getRightBtnMethod() {
         if (subscribe != null) {
             subscribe.unsubscribe();
+            Utils.setResultToText(this.context, mTexInfo, "done");
         }
     }
 

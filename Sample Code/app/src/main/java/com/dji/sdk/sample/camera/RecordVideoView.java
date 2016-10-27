@@ -159,10 +159,11 @@ public class RecordVideoView extends BaseThreeBtnView {
 
             Observable<StreamLocation> phoneLocations = locationUpdates(getLocationManager(getContext())).map(StreamLocation::fromLocation).takeUntil(droneLocations);
 
-            Observable<StreamLocation> locationsRx = droneLocations.startWith(phoneLocations);
+            Observable<StreamLocation> locationsRx = droneLocations.startWith(phoneLocations).onBackpressureDrop().throttleFirst(500, MILLISECONDS);
 
             Observable<List<StreamLocation>> chunks = locationsRx.buffer(2, SECONDS).filter(list -> !list.isEmpty());
             Observable<Pair<Integer, List<StreamLocation>>> numberedChunks = chunks.zipWith(Observable.range(0, Integer.MAX_VALUE), (locations, mseq) -> Pair.of(mseq, locations));
+            numberedChunks = numberedChunks.onBackpressureBuffer();
             Observable<Request> requests = numberedChunks.map(p -> {
                 int mseq = p.left;
                 List<StreamLocation> locations = p.right;
